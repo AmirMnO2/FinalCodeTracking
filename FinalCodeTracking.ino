@@ -90,10 +90,12 @@ void loop() {
   c = c + 1;
 
   /////////// Find sensor values, turn --> true if the opposing sensors are not equal
-  c1 = analogRead(A0);
+    c1 = analogRead(A0);
   c2 = analogRead(A1);
+  c2= c2 - 5;
   c3 = analogRead(A2);
   c4 = analogRead(A3);
+  c4 = c4 + 13;
 
   //  c1 = map(c1, 0, 1023, 0, 127);
   // c2 = map(c2, 0, 1023, 0, 127);
@@ -170,16 +172,18 @@ void loop() {
     }
 
 
-    c1 = analogRead(A0);
-    //c1 = map(c1, 0, 1023, 0, 127);
-    c2 = analogRead(A1);
-    //c2 = map(c2, 0, 1023, 0, 127);
-    c3 = analogRead(A2);
-    //c3 = map(c3, 0, 1023, 0, 127);
-    c4 = analogRead(A3);
-    //c4 = map(c4, 0, 1023, 0, 127);
-    c3 = c3 + + sensorOffset;
+  c1 = analogRead(A0);
+  c2 = analogRead(A1);
+  c2= c2 - 5;
+  c3 = analogRead(A2);
+  c4 = analogRead(A3);
+  c4 = c4 + 13;
 
+    //c1 = map(c1, 0, 1023, 0, 127);
+    //c2 = map(c2, 0, 1023, 0, 127);
+    //c3 = map(c3, 0, 1023, 0, 127);
+    //c4 = map(c4, 0, 1023, 0, 127);
+  
     if (c1 == c2)
     {
       analogWrite(PWMpin1, LOW);
@@ -191,7 +195,7 @@ void loop() {
       analogWrite(PWMpin4, LOW);
     }
     //c3 = c3 - 20;
-    turn = abs(c1 - c2) >= 4 || abs(c3 - c4) >= 4 ;
+    turn = abs(c1 - c2) !=0 || abs(c3 - c4) != 0 ;
 
     if (i == 500)
     {
@@ -229,15 +233,15 @@ void setDC()
   mindc1 = 960;//65;
   mindc2d = 1600;//100;
 
-  dc1 = 0;// mindc1 + k1 * abs(c1 - c2); // azimuth but shouldn't it look at c1 and c2
-  dc2u = 0;// mindc2u + k2 * abs(c3 - c4) + k3 * fbPosition2; // power to go up (zenith)
-  dc2d = 0;//mindc2d + k2 * abs(c3 - c4); //
+  dc1 = mindc1 + k1 * abs(c1 - c2); // azimuth (left/right)
+  dc2u =  mindc2u + k2 * abs(c3 - c4) + k3 * fbPosition2; //power to go up (zenith)
+  dc2d = mindc2d + k2 * abs(c3 - c4); //
 
-//  Serial.println("MotorValues");
-//  Serial.println(dc1);
-//  Serial.println(dc2u);
- // Serial.println(dc2d);
-//  Serial.println("EndMotorValues");
+ // Serial.println("MotorValues");
+ // Serial.println(dc1);
+ // Serial.println(dc2u);
+  //Serial.println(dc2d);
+ // Serial.println("EndMotorValues");
 
 }
 void limitCheck()
