@@ -39,9 +39,9 @@ c2   |         front plane         |  c1
 
 int dc1, dc2u, dc2d;
 int mindc1, mindc2u, mindc2d;
-int k2 = 3; // zenith multiplier
-int k1 = 2; //azimuth multiplier
-int k3 = 0.2; //  zenith position multiplier , might be flipped
+int k2 = 8; // zenith multiplier
+int k1 = 4; //azimuth multiplier
+int k3 = 1; //  zenith position multiplier , might be flipped
 int c; ////turn direction indicator variables
 bool turn;
 bool zturn1;
@@ -229,12 +229,12 @@ void setDC()
 
   //base speed
   //max is 4096
-  mindc2u = 2080;//130;
-  mindc1 = 960;//65;
-  mindc2d = 1600;//100;
+  mindc2u = 3080;//130;
+  mindc1 = 1200;//65;
+  mindc2d = 2500;//100;
 
   dc1 = mindc1 + k1 * abs(c1 - c2); // azimuth (left/right)
-  dc2u =  mindc2u + k2 * abs(c3 - c4) + k3 * fbPosition2; //power to go up (zenith)
+  dc2u =  mindc2u + k2 * abs(c3 - c4) + k3 * (300-fbPosition2); //power to go up (zenith)
   dc2d = mindc2d + k2 * abs(c3 - c4); //
 
  // Serial.println("MotorValues");
