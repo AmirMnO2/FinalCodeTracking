@@ -1,4 +1,4 @@
-//Connected to motors, reives information about motor position
+//Connected to motors, retrieves information about motor position
 const int feedbackPin1 = A4;
 const int feedbackPin2 = A5;
 
@@ -13,18 +13,36 @@ const int outPin3 = 27;
 const int outPin4 = 29;
 
 //Describe the motor positions
-int fbPosition1 = 0;
-int fbPosition2 = 0;
+int fbPosition1 = 0; //100 <fbPosition1< 630
+int fbPosition2 = 0; // 70 <fbPosition2< 170
 
-int goalPosition = 0;
-
+int sensorOffset = 0;
 int c1, c2, c3, c4; // Sensors
+
+/*
+sensor position reference
+                  c4
+     |-----------------------------|
+     |                             |
+     |                             |
+     |                             |
+c2   |         front plane         |  c1
+     |                             |
+     |                             |
+     |-----------------------------|
+                  c3
+
+
+                  ground
+----------------------------------------------
+*/
+
 int dc1, dc2u, dc2d;
 int mindc1, mindc2u, mindc2d;
 int k2 = 3; // zenith multiplier
 int k1 = 2; //azimuth multiplier
 int k3 = 0.2; //  zenith position multiplier , might be flipped
-int c;
+int c; ////turn direction indicator variables
 bool turn;
 bool zturn1;
 bool zturn2;
@@ -72,30 +90,38 @@ void loop() {
   c = c + 1;
 
   /////////// Find sensor values, turn --> true if the opposing sensors are not equal
-
   c1 = analogRead(A0);
-  //  c1 = map(c1, 0, 1023, 0, 127);
   c2 = analogRead(A1);
-  // c2 = map(c2, 0, 1023, 0, 127);
   c3 = analogRead(A2);
-  // c3 = map(c3, 0, 1023, 0, 127);
   c4 = analogRead(A3);
+
+  //  c1 = map(c1, 0, 1023, 0, 127);
+  // c2 = map(c2, 0, 1023, 0, 127);
+  // c3 = map(c3, 0, 1023, 0, 127);
   //c4 = map(c4, 0, 1023, 0, 127);
+
   fbPosition1 = analogRead(feedbackPin1); //azimuth
   fbPosition2 = analogRead(feedbackPin2); //zenith
-  c3 = c3 + 4;
+
+  c3 = c3 + sensorOffset;
   turn = abs(c1 - c2) != 0 || abs(c3 - c4) != 0;
 
 
-  //////////////////Every 350 cycle (0.1ms?) print each sensor value//////////////
-  if (c == 350)
+  //////////////////Every 1000 cycle (0.1ms?) print each sensor value//////////////
+  if (c == 1000)
   {
     Serial.println("Start Printing");
+    Serial.print("azimuth: ");
     Serial.println(fbPosition1);
+    Serial.print("zenith: ");
     Serial.println(fbPosition2);
+    Serial.print("c1: ");
     Serial.println(c1);
+    Serial.print("c2: ");
     Serial.println(c2);
+    Serial.print("c3: ");
     Serial.println(c3);
+    Serial.print("c4: ");
     Serial.println(c4);
     Serial.println("End Printing");
     c = 0;
@@ -152,7 +178,7 @@ void loop() {
     //c3 = map(c3, 0, 1023, 0, 127);
     c4 = analogRead(A3);
     //c4 = map(c4, 0, 1023, 0, 127);
-    c3 = c3 + 4;
+    c3 = c3 + + sensorOffset;
 
     if (c1 == c2)
     {
@@ -165,18 +191,24 @@ void loop() {
       analogWrite(PWMpin4, LOW);
     }
     //c3 = c3 - 20;
-    turn = abs(c1 - c2) != 0 || abs(c3 - c4) != 0;
+    turn = abs(c1 - c2) >= 4 || abs(c3 - c4) >= 4 ;
 
-    if (i == 100)
+    if (i == 500)
     {
-      Serial.println("StartP");
+      Serial.println("Start Printing");
+      Serial.print("azimuth: ");
       Serial.println(fbPosition1);
+      Serial.print("zenith: ");
       Serial.println(fbPosition2);
+      Serial.print("c1: ");
       Serial.println(c1);
+      Serial.print("c2: ");
       Serial.println(c2);
+      Serial.print("c3: ");
       Serial.println(c3);
+      Serial.print("c4: ");
       Serial.println(c4);
-      Serial.println("EndP");
+      Serial.println("End Printing");
       i = 0;
     }
     //  delay(50);
@@ -190,19 +222,22 @@ void loop() {
 
 void setDC()
 {
+
+  //base speed
+  //max is 4096
   mindc2u = 2080;//130;
   mindc1 = 960;//65;
   mindc2d = 1600;//100;
 
-  dc1 = mindc1 + k1 * abs(c3 - c4); // azimuth but shouldn't it look at c1 and c2
-  dc2u = mindc2u + k2 * abs(c1 - c2) + k3 * fbPosition2; // power to go up (zenith)
-  dc2d = mindc2d + k2 * abs(c1 - c2); //
+  dc1 = 0;// mindc1 + k1 * abs(c1 - c2); // azimuth but shouldn't it look at c1 and c2
+  dc2u = 0;// mindc2u + k2 * abs(c3 - c4) + k3 * fbPosition2; // power to go up (zenith)
+  dc2d = 0;//mindc2d + k2 * abs(c3 - c4); //
 
-  Serial.println("MotorValues");
-  Serial.println(dc1);
-  Serial.println(dc2u);
-  Serial.println(dc2d);
-  Serial.println("EndMotorValues");
+//  Serial.println("MotorValues");
+//  Serial.println(dc1);
+//  Serial.println(dc2u);
+ // Serial.println(dc2d);
+//  Serial.println("EndMotorValues");
 
 }
 void limitCheck()
