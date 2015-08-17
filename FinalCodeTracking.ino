@@ -12,11 +12,17 @@ const int outPin2 = 33;
 const int outPin3 = 27;
 const int outPin4 = 29;
 
+////////////offsets////////////
+
+const int offsetPin = 53;
+int offsetHolder;
+int sensorOffset = 5;
+
+
 //Describe the motor positions
 int fbPosition1 = 0; //100 <fbPosition1< 630
 int fbPosition2 = 0; // 70 <fbPosition2< 170
 
-int sensorOffset = 0;
 int c1, c2, c3, c4; // Sensors
 
 /*
@@ -38,6 +44,10 @@ c2   |         front plane         |  c1
 */
 
 int dc1, dc2u, dc2d;
+
+int offset_trial = 0;
+
+
 int mindc1, mindc2u, mindc2d;
 int k2 = 8; // zenith multiplier
 int k1 = 4; //azimuth multiplier
@@ -71,6 +81,9 @@ void setup() {
   pinMode(outPin3, OUTPUT);
   pinMode(outPin4, OUTPUT);
 
+  pinMode(offsetPin, INPUT);
+  digitalWrite(offsetPin, HIGH);
+
   digitalWrite(PWMpin1, LOW);
   digitalWrite(PWMpin2, LOW);
   digitalWrite(PWMpin3, LOW);
@@ -86,8 +99,14 @@ void setup() {
   i = 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////MAIN LOOP////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
 void loop() {
   c = c + 1;
+
+
 
   /////////// Find sensor values, turn --> true if the opposing sensors are not equal
     c1 = analogRead(A0);
@@ -95,7 +114,7 @@ void loop() {
   c2= c2 - 5;
   c3 = analogRead(A2);
   c4 = analogRead(A3);
-  c4 = c4 + 13;
+  c4 = c4 + sensorOffset;
 
   //  c1 = map(c1, 0, 1023, 0, 127);
   // c2 = map(c2, 0, 1023, 0, 127);
@@ -125,6 +144,8 @@ void loop() {
     Serial.println(c3);
     Serial.print("c4: ");
     Serial.println(c4);
+    Serial.print("sensorOffset ");
+    Serial.println(sensorOffset);
     Serial.println("End Printing");
     c = 0;
   }
@@ -170,14 +191,18 @@ void loop() {
     {
       moveClockwise();
     }
-
+ offsetHolder = digitalRead(offsetPin);
+if ( offsetHolder == HIGH){
+  sensorOffset = sensorOffset + 1;
+  delay (1000);
+}
 
   c1 = analogRead(A0);
   c2 = analogRead(A1);
   c2= c2 - 5;
   c3 = analogRead(A2);
   c4 = analogRead(A3);
-  c4 = c4 + 13;
+  c4 = c4 + sensorOffset ;
 
     //c1 = map(c1, 0, 1023, 0, 127);
     //c2 = map(c2, 0, 1023, 0, 127);
@@ -199,20 +224,22 @@ void loop() {
 
     if (i == 500)
     {
-      Serial.println("Start Printing");
-      Serial.print("azimuth: ");
-      Serial.println(fbPosition1);
-      Serial.print("zenith: ");
-      Serial.println(fbPosition2);
-      Serial.print("c1: ");
-      Serial.println(c1);
-      Serial.print("c2: ");
-      Serial.println(c2);
-      Serial.print("c3: ");
-      Serial.println(c3);
-      Serial.print("c4: ");
-      Serial.println(c4);
-      Serial.println("End Printing");
+     Serial.println("Start Printing");
+    Serial.print("azimuth: ");
+    Serial.println(fbPosition1);
+    Serial.print("zenith: ");
+    Serial.println(fbPosition2);
+    Serial.print("c1: ");
+    Serial.println(c1);
+    Serial.print("c2: ");
+    Serial.println(c2);
+    Serial.print("c3: ");
+    Serial.println(c3);
+    Serial.print("c4: ");
+    Serial.println(c4);
+    Serial.print("sensorOffset ");
+    Serial.println(sensorOffset);
+    Serial.println("End Printing");
       i = 0;
     }
     //  delay(50);
@@ -345,6 +372,12 @@ void switchOff()
   digitalWrite(PWMpin3, LOW);
   digitalWrite(PWMpin4, LOW);
   //delay(2000);
+}
+
+void increment_test()
+{
+
+    sensorOffset = sensorOffset + 1;
 }
 
 
